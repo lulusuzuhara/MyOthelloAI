@@ -1,21 +1,3 @@
-# Reversi-Client
-
-大学の課題のオセロプログラム（クライアント側）を OCaml から Rust に書き直したものです。サーバーや相手のクライアントが Rust 以外の言語で実装されていても使うことができます。  
-
-OCaml のコードを愚直に Rust に移しただけであり、オセロの性能強化は一切行なっていないため、このプログラムを自由に使ったり改変したりしていただいて構いません。また、もしバグなどを見つけたら、私に直接連絡するか Issue に報告していただけると、非常にありがたいです。
-
-[CHANGELOG.md](./CHANGELOG.md) でこのプログラムの変更履歴を確認できます。
-
-## Demo
-
-![reversi.gif](https://user-images.githubusercontent.com/36184621/60187967-81e88c80-9869-11e9-827a-001d782e8cce.gif)
-
-※ tmux でターミナルを切り替えており、  
-
-[0] サーバー（OCaml）  
-[1] クライアントその1（OCaml）  
-[2] クライアントその2（Rust）  
-
 ## Usage
 
 [環境構築](https://doc.rust-jp.rs/book/second-edition/ch01-01-installation.html)は済ませてください。  

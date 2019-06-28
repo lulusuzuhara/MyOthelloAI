@@ -151,7 +151,7 @@ pub fn play (board: &Board, color: Color) -> Move {
 
     for ((i, j), _) in &ms {
       let mut board_tmp = board.clone();
-      // 次に相手が隅を取られるような置き方を回避する
+      // 次に相手に隅を取られるような置き方を回避する
       if !is_next_corner_taken(&mut board_tmp, color, (*i, *j)) {
         return Move::Mv(*i, *j)
       }

@@ -19,6 +19,18 @@ pub fn init_board () -> Board {
   board
 }
 
+pub fn number_of_stones (board: &Board) -> i32 {
+  let mut num = 0;
+  for i in 1..9 {
+    for j in 1..9 {
+      if board[i][j] != none {
+        num += 1;
+      }
+    }
+  }
+  num
+}
+
 fn g (board: &Board, color: Color, (di, dj): (i32, i32), (i, j): (i32, i32), r: &mut Vec<(i32, i32)>) {
   let ocolor = opposite_color(color);
 
@@ -130,7 +142,12 @@ pub fn play (board: &Board, color: Color) -> Move {
       }
     } 
 
-    ms.sort_by(|a, b| b.1.cmp(&a.1));
+    // 序盤は石を取りすぎないよう、最も取る石の少ない手にする
+    if number_of_stones(&board) <= 20 {
+      ms.sort_by(|a, b| a.1.cmp(&b.1));
+    } else {
+      ms.sort_by(|a, b| b.1.cmp(&a.1));
+    }
 
     for ((i, j), _) in &ms {
       let mut board_tmp = board.clone();
@@ -235,6 +252,7 @@ fn check() {
   do_move(&mut board, &Move::Mv(3, 3), white);
   do_move(&mut board, &Move::Mv(2, 3), black);
   do_move(&mut board, &Move::Mv(2, 2), white);
+  assert_eq!(number_of_stones(&board), 8);
   print_board(&board);
   let mut board_clone1 = board.clone();
   assert_eq!(is_next_corner_taken(&mut board_clone1, black, (2, 1)), true);

@@ -1,6 +1,5 @@
 use crate::color::*;
 use crate::command::*;
-use rand::Rng;
 
 pub type Board = [[Color; 10]; 10];
 
@@ -59,16 +58,12 @@ pub fn flippable_indices (board: &Board, color: Color, (i, j): (i32, i32)) -> Ve
   bs
 }
 
-pub fn is_effective (board: &Board, color: Color, (i, j): (i32, i32)) -> bool {
-  if flippable_indices(board, color, (i, j)).is_empty() {
-    false
-  } else {
-    true
-  }
+pub fn flippable_num (board: &Board, color: Color, (i, j): (i32, i32)) -> usize {
+  flippable_indices(board, color, (i, j)).len()
 }
 
 pub fn is_valid_move (board: &Board, color: Color, (i, j): (i32, i32)) -> bool {
-  board[i as usize][j as usize] == none && is_effective(board, color, (i, j))
+  board[i as usize][j as usize] == none && flippable_num(board, color, (i, j)) != 0
 }
 
 pub fn do_move (board: &mut Board, com: &Move, color: Color) {
@@ -94,27 +89,27 @@ pub fn mix (xs: Vec<i32>, ys: Vec<i32>) -> Vec<(i32, i32)> {
   ans_v
 }
 
-pub fn valid_moves (board: &Board, color: Color) -> Vec<(i32, i32)> {
+pub fn valid_moves (board: &Board, color: Color) -> Vec<((i32, i32), usize)> {
   let ls1 = vec![1, 2, 3, 4, 5, 6, 7, 8];
   let ls2 = vec![1, 2, 3, 4, 5, 6, 7, 8];
 
   let mut ans_v = Vec::new();
   for tup in &mix(ls1, ls2) {
     if is_valid_move(board, color, *tup) {
-      ans_v.push(*tup);
+      ans_v.push((*tup, flippable_num(board, color, *tup)));
     }
   }
   ans_v
 }
 
 pub fn play (board: &Board, color: Color) -> Move {
-  let ms = valid_moves(board, color);
+  let mut ms = valid_moves(board, color);
   if ms == vec![] {
     Move::Pass
   } else {
-    let mut rng = rand::thread_rng();
-    let k = rng.gen_range(0, ms.len());
-    let (i, j) = ms[k];
+    ms.sort_by(|a, b| b.1.cmp(&a.1));
+
+    let (i, j) = ms[0].0;
     Move::Mv(i, j)
   }
 }
@@ -170,12 +165,12 @@ pub fn print_board (board: &Board) {
 #[test]
 fn check() {
   let mut board = init_board();
-  assert_eq!(is_effective(&board, black, (3, 4)), true);
-  assert_eq!(is_effective(&board, black, (3, 5)), false);
-  assert_eq!(is_effective(&board, black, (2, 5)), false);
-  assert_eq!(is_effective(&board, black, (6, 6)), false);
-  assert_eq!(is_effective(&board, white, (6, 6)), false);
-  assert_eq!(is_effective(&board, white, (4, 6)), true);
+  assert_eq!(flippable_num(&board, black, (3, 4)), 1);
+  assert_eq!(flippable_num(&board, black, (3, 5)), 0);
+  assert_eq!(flippable_num(&board, black, (2, 5)), 0);
+  assert_eq!(flippable_num(&board, black, (6, 6)), 0);
+  assert_eq!(flippable_num(&board, white, (6, 6)), 0);
+  assert_eq!(flippable_num(&board, white, (4, 6)), 1);
 
   for i in 1..9 {
     for j in 1..9 {
@@ -190,7 +185,7 @@ fn check() {
 
   board = init_board();
   print_board(&board);
-  assert_eq!(valid_moves(&board, black), vec![(3, 4), (4, 3), (5, 6), (6, 5)]);
+  assert_eq!(valid_moves(&board, black), vec![((3, 4), 1), ((4, 3), 1), ((5, 6), 1), ((6, 5), 1)]);
   for i in 4..9 {
     for j in 3..9 {
       board[i][j] = white;
@@ -199,5 +194,8 @@ fn check() {
   board[8][8] = black;
   board[5][4] = black;
   print_board(&board);
-  assert_eq!(valid_moves(&board, black), vec![(3, 2), (3, 3), (3, 4), (3, 6), (3, 8), (5, 2), (7, 2), (8, 2)]);
+  let mut ms = valid_moves(&board, black);
+  assert_eq!(ms, vec![((3, 2), 1), ((3, 3), 4), ((3, 4), 1), ((3, 6), 1), ((3, 8), 4), ((5, 2), 1), ((7, 2), 1), ((8, 2), 5)]);
+  ms.sort_by(|a, b| b.1.cmp(&a.1));
+  assert_eq!(ms[0].0, (8, 2));
 }

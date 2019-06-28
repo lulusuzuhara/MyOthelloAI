@@ -145,7 +145,7 @@ pub fn can_create_edge(board: &Board, (i, j): (i32, i32), color: Color) -> bool 
       let mut flag = false;
       for k in 2..j {
         if !flag {
-          if board[i as usize][k as usize] != color {
+          if board[i as usize][k as usize] == opposite_color(color) {
             flag = true;
           }
         } else {
@@ -163,7 +163,7 @@ pub fn can_create_edge(board: &Board, (i, j): (i32, i32), color: Color) -> bool 
       let mut flag = false;
       for k in (j+1..8).rev() {
         if !flag {
-          if board[i as usize][k as usize] != color {
+          if board[i as usize][k as usize] == opposite_color(color) {
             flag = true;
           }
         } else {
@@ -183,7 +183,7 @@ pub fn can_create_edge(board: &Board, (i, j): (i32, i32), color: Color) -> bool 
       let mut flag = false;
       for k in 2..i {
         if !flag {
-          if board[k as usize][j as usize] != color {
+          if board[k as usize][j as usize] == opposite_color(color) {
             flag = true;
           }
         } else {
@@ -201,7 +201,7 @@ pub fn can_create_edge(board: &Board, (i, j): (i32, i32), color: Color) -> bool 
       let mut flag = false;
       for k in (i+1..8).rev() {
         if !flag {
-          if board[k as usize][j as usize] != color {
+          if board[k as usize][j as usize] == opposite_color(color) {
             flag = true;
           }
         } else {

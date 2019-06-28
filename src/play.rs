@@ -302,8 +302,10 @@ pub fn play (board: &Board, color: Color) -> Move {
   if ms == vec![] {
     Move::Pass
   } else {
+    let num = number_of_stones(&board);
+
     // 読み切りする
-    if number_of_stones(&board) >= 50 {
+    if num >= 50 {
       for ((i, j), _) in &ms {
         let mut board_tmp = board.clone();
 
@@ -324,13 +326,21 @@ pub fn play (board: &Board, color: Color) -> Move {
     } 
 
     // 序盤は石を取りすぎないよう、最も取る石の少ない手にする
-    if number_of_stones(&board) <= 20 {
+    if num <= 20 {
       ms.sort_by(|a, b| a.1.cmp(&b.1));
     } else {
       ms.sort_by(|a, b| b.1.cmp(&a.1));
     }
 
     for ((i, j), _) in &ms {
+      // 中盤までは端の方を取らない
+      if num <= 40 && 
+        vec![(1, 2), (2, 2), (2, 1), (1, 7), (2, 7), (2, 8), 
+          (7, 1), (7, 2), (8, 2), (8, 7), (7, 7), (7, 8)].contains(&(*i, *j)) 
+      {
+        continue;
+      }
+
       let mut board_tmp = board.clone();
       // 次に相手に隅を取られるような置き方を回避する
       if !is_next_corner_taken(&mut board_tmp, color, (*i, *j)) {

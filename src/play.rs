@@ -107,6 +107,13 @@ pub fn play (board: &Board, color: Color) -> Move {
   if ms == vec![] {
     Move::Pass
   } else {
+    // 隅が取れる時にはとにかく取る
+    for ((i, j), _) in &ms {
+      if (*i, *j) == (1, 1) || (*i, *j) == (1, 8) || (*i, *j) == (8, 1) || (*i, *j) == (8, 8) {
+        return Move::Mv(*i, *j);
+      }
+    } 
+
     ms.sort_by(|a, b| b.1.cmp(&a.1));
 
     let (i, j) = ms[0].0;

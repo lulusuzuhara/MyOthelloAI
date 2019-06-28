@@ -224,7 +224,7 @@ pub fn can_create_edge(board: &Board, (i, j): (i32, i32), color: Color) -> bool 
  * 絶対に勝てる手のとき、true を返す。
  */
 fn yomikiri(board: &mut Board, color: Color, (i, j): (i32, i32)) -> bool {
-  println!("YOMIKIRI??");
+  //println!("YOMIKIRI??");
   do_move(board, &Move::Mv(i, j), color);
 
   // 相手の動ける手を計算
@@ -306,7 +306,7 @@ pub fn play (board: &Board, color: Color) -> Move {
     // println!("おーい");
     if number_of_stones(&board) >= 50 {
       for ((i, j), _) in &ms {
-        println!("{}", number_of_stones(&board));
+        //println!("{}", number_of_stones(&board));
         let mut board_tmp = board.clone();
 
         if yomikiri(&mut board_tmp, color, (*i, *j)) {

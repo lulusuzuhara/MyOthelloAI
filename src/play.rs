@@ -102,6 +102,22 @@ pub fn valid_moves (board: &Board, color: Color) -> Vec<((i32, i32), usize)> {
   ans_v
 }
 
+/**
+ * もし自分がその手に動かした時に、相手が隅を取れるような置き方になってしまうかどうか
+ */
+pub fn is_next_corner_taken (board: &mut Board, color: Color, (i, j): (i32, i32)) -> bool {
+  do_move(board, &Move::Mv(i, j), color);
+
+  let ms = valid_moves(&board, opposite_color(color));
+  for ((i, j), _) in &ms {
+    if (*i, *j) == (1, 1) || (*i, *j) == (1, 8) || (*i, *j) == (8, 1) || (*i, *j) == (8, 8) {
+      return true;
+    }
+  } 
+  false
+}
+
+
 pub fn play (board: &Board, color: Color) -> Move {
   let mut ms = valid_moves(board, color);
   if ms == vec![] {
@@ -116,6 +132,14 @@ pub fn play (board: &Board, color: Color) -> Move {
 
     ms.sort_by(|a, b| b.1.cmp(&a.1));
 
+    for ((i, j), _) in &ms {
+      let mut board_tmp = board.clone();
+      // 次に相手が隅を取られるような置き方を回避する
+      if !is_next_corner_taken(&mut board_tmp, color, (*i, *j)) {
+        return Move::Mv(*i, *j)
+      }
+    }
+    
     let (i, j) = ms[0].0;
     Move::Mv(i, j)
   }
@@ -205,4 +229,17 @@ fn check() {
   assert_eq!(ms, vec![((3, 2), 1), ((3, 3), 4), ((3, 4), 1), ((3, 6), 1), ((3, 8), 4), ((5, 2), 1), ((7, 2), 1), ((8, 2), 5)]);
   ms.sort_by(|a, b| b.1.cmp(&a.1));
   assert_eq!(ms[0].0, (8, 2));
+
+  board = init_board();
+  do_move(&mut board, &Move::Mv(4, 3), black);
+  do_move(&mut board, &Move::Mv(3, 3), white);
+  do_move(&mut board, &Move::Mv(2, 3), black);
+  do_move(&mut board, &Move::Mv(2, 2), white);
+  print_board(&board);
+  let mut board_clone1 = board.clone();
+  assert_eq!(is_next_corner_taken(&mut board_clone1, black, (2, 1)), true);
+  print_board(&board);
+  let mut board_clone2 = board.clone();
+  assert_eq!(is_next_corner_taken(&mut board_clone2, black, (3, 4)), false);
+  print_board(&board);
 }

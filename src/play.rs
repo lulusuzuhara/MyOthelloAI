@@ -303,20 +303,15 @@ pub fn play (board: &Board, color: Color) -> Move {
     Move::Pass
   } else {
     // 読み切りする
-    // println!("おーい");
     if number_of_stones(&board) >= 50 {
       for ((i, j), _) in &ms {
-        //println!("{}", number_of_stones(&board));
         let mut board_tmp = board.clone();
 
         if yomikiri(&mut board_tmp, color, (*i, *j)) {
-          //println!("よみきったお");
           return Move::Mv(*i, *j)
         }
       }
-      //println!("よみきれなかったお");
     }
-    //println!("わっほい");
 
     for ((i, j), _) in &ms {
       // 隅が取れる時にはとにかく取る

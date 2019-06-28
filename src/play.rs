@@ -333,6 +333,14 @@ pub fn play (board: &Board, color: Color) -> Move {
     }
 
     for ((i, j), _) in &ms {
+      // 序盤は縁周辺も避ける
+      if num <= 20 &&
+        (*i == 1 || *i == 2 || *i == 7 || *i == 8 ||
+         *j == 1 || *j == 2 || *j == 7 || *j == 8)
+      {
+        continue;
+      } 
+
       // 中盤までは端の方を取らない
       if num <= 40 && 
         vec![(1, 2), (2, 2), (2, 1), (1, 7), (2, 7), (2, 8), 
@@ -340,6 +348,32 @@ pub fn play (board: &Board, color: Color) -> Move {
       {
         continue;
       }
+
+      let mut board_tmp = board.clone();
+      // 次に相手に隅を取られるような置き方を回避する
+      if !is_next_corner_taken(&mut board_tmp, color, (*i, *j)) {
+        return Move::Mv(*i, *j)
+      }
+    }
+
+    // これで候補が無いなら妥協して、
+    // 縁周辺（2, 7）ならよいことにする
+
+    for ((i, j), _) in &ms {
+      // 中盤までは端の方を取らない
+      if num <= 40 && 
+        vec![(1, 2), (2, 2), (2, 1), (1, 7), (2, 7), (2, 8), 
+          (7, 1), (7, 2), (8, 2), (8, 7), (7, 7), (7, 8)].contains(&(*i, *j)) 
+      {
+        continue;
+      }
+
+      if num <= 20 &&
+        (*i == 1 || *i == 8 ||
+         *j == 1 || *j == 8)
+      {
+        continue;
+      } 
 
       let mut board_tmp = board.clone();
       // 次に相手に隅を取られるような置き方を回避する

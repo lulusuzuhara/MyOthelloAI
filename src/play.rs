@@ -129,15 +129,108 @@ pub fn is_next_corner_taken (board: &mut Board, color: Color, (i, j): (i32, i32)
   false
 }
 
+/**
+ * 連続した縁を作れるかどうか
+ * 例えば自分が B だとして
+ *  B W W W ◯
+ *  B B W W ◯
+ *  B B B W ◯
+ *  B B B B ◯
+ * のいずれかになっているか
+ */
+pub fn can_create_edge(board: &Board, (i, j): (i32, i32), color: Color) -> bool {
+  if i == 1 || i == 8 {
+    if board[i as usize][1] == color {
+      let mut ans = true;
+      let mut flag = false;
+      for k in 2..j {
+        if !flag {
+          if board[i as usize][k as usize] != color {
+            flag = true;
+          }
+        } else {
+          if board[i as usize][k as usize] == color {
+            ans = false;
+            break;
+          }
+        }
+      }
+      if ans {
+        return true;
+      }
+    } else if board[i as usize][8] == color {
+      let mut ans = true;
+      let mut flag = false;
+      for k in (j+1..8).rev() {
+        if !flag {
+          if board[i as usize][k as usize] != color {
+            flag = true;
+          }
+        } else {
+          if board[i as usize][k as usize] == color {
+            ans = false;
+            break;
+          }
+        }
+      }
+      if ans {
+        return true;
+      }
+    }
+  } else if j == 1 || j == 8 {
+    if board[1][j as usize] == color {
+      let mut ans = true;
+      let mut flag = false;
+      for k in 2..i {
+        if !flag {
+          if board[k as usize][j as usize] != color {
+            flag = true;
+          }
+        } else {
+          if board[k as usize][j as usize] == color {
+            ans = false;
+            break;
+          }
+        }
+      }
+      if ans {
+        return true;
+      }
+    } else if board[8][j as usize] == color {
+      let mut ans = true;
+      let mut flag = false;
+      for k in (i+1..8).rev() {
+        if !flag {
+          if board[k as usize][j as usize] != color {
+            flag = true;
+          }
+        } else {
+          if board[k as usize][j as usize] == color {
+            ans = false;
+            break;
+          }
+        }
+      }
+      if ans {
+        return true;
+      }
+    }
+  }
+  false
+}
+
 
 pub fn play (board: &Board, color: Color) -> Move {
   let mut ms = valid_moves(board, color);
   if ms == vec![] {
     Move::Pass
   } else {
-    // 隅が取れる時にはとにかく取る
     for ((i, j), _) in &ms {
+      // 隅が取れる時にはとにかく取る
       if (*i, *j) == (1, 1) || (*i, *j) == (1, 8) || (*i, *j) == (8, 1) || (*i, *j) == (8, 8) {
+        return Move::Mv(*i, *j);
+      // 隅が既に取れていて、かつ隅と連続する縁を取れる場合は取る
+      } else if can_create_edge(&board, (*i, *j), color) {
         return Move::Mv(*i, *j);
       }
     } 
@@ -260,4 +353,31 @@ fn check() {
   let mut board_clone2 = board.clone();
   assert_eq!(is_next_corner_taken(&mut board_clone2, black, (3, 4)), false);
   print_board(&board);
+
+  board = init_board();
+  for i in 4..9 {
+    for j in 3..9 {
+      board[i][j] = white;
+    }
+  }
+  board[5][8] = black;
+  board[6][8] = black;
+  board[7][8] = black;
+  board[8][8] = black;
+  print_board(&board);
+  assert_eq!(can_create_edge(&board, (8, 3), black), true);
+  assert_eq!(can_create_edge(&board, (2, 8), black), true);
+  assert_eq!(can_create_edge(&board, (2, 7), black), false);
+
+  board = init_board();
+  for i in 1..8 {
+    for j in 1..9 {
+      board[i][j] = black;
+    }
+  }
+  board[5][6] = white;
+  board[6][7] = white;
+  board[7][8] = none;
+  print_board(&board);
+  assert_eq!(can_create_edge(&board, (7, 8), black), true);
 }

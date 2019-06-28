@@ -303,6 +303,15 @@ pub fn play (board: &Board, color: Color) -> Move {
     Move::Pass
   } else {
     let num = number_of_stones(&board);
+    
+    // 2手目の定石
+    if num == 5 {
+      if board[3][4] == black || board[4][3] == black {
+        return Move::Mv(3, 3);
+      } else {
+        return Move::Mv(6, 6);
+      }
+    }
 
     // 読み切りする
     if num >= 50 {

@@ -219,12 +219,105 @@ pub fn can_create_edge(board: &Board, (i, j): (i32, i32), color: Color) -> bool 
   false
 }
 
+/**
+ * 読み切り。
+ * 絶対に勝てる手のとき、true を返す。
+ */
+fn yomikiri(board: &mut Board, color: Color, (i, j): (i32, i32)) -> bool {
+  println!("YOMIKIRI??");
+  do_move(board, &Move::Mv(i, j), color);
+
+  // 相手の動ける手を計算
+  let ms_o = valid_moves(board, opposite_color(color));
+
+  if ms_o == vec![] {
+    // 相手がもう動けない場合
+    // 自分が動けるかを計算
+    let ms_p = valid_moves(board, color);
+
+    if ms_p == vec![] {
+      // 自分も動けない場合、勝敗を確認
+      let pc = count(&board, color);
+      let oc = count(&board, opposite_color(color));
+      if pc > oc {
+        true
+      } else {
+        false
+      }
+    } else {
+      // 自分が動ける場合、再帰になる
+      let mut ans = true;
+
+      for ((i, j), _) in &ms_p {
+        let mut board_tmp = board.clone();
+        // 一つでも相手が勝つ場合があれば、ans は false になる
+        if !yomikiri(&mut board_tmp, color, (*i, *j)) {
+          ans = false;
+          break;
+        }
+      }
+
+      ans
+    }
+  } else {
+    // 相手がまだ動ける場合
+    let mut ans = true;
+    for ((i, j), _) in &ms_o {
+      let mut board_tmp = board.clone();
+      // 相手を動かす
+      do_move(&mut board_tmp, &Move::Mv(*i, *j), opposite_color(color));
+      
+      // 次に自分を動かす
+      let ms_p = valid_moves(&board_tmp, color);
+      let mut flag = false;
+
+      if ms_p == vec![] {
+        // 本当はまだ相手が動けるか確認すべきだけどまあ false でいいや
+        return false;
+      } else {
+        // 自分が動く場合、それぞれ動かしてみる
+        for ((i2, j2), _) in &ms_p {
+          let mut board_tmp2 = board_tmp.clone();
+
+          // もし一つでも相手が勝つ場合があれば、 flag を立てる
+          if !yomikiri(&mut board_tmp2, color, (*i2, *j2)) {
+            flag = true;
+            break;
+          }
+        }
+      }
+      // flag が立っているとき、相手が勝つ場合があるので、false になる
+      if flag {
+        ans = false;
+        break;
+      }
+    }
+    ans
+  }
+}
+
 
 pub fn play (board: &Board, color: Color) -> Move {
   let mut ms = valid_moves(board, color);
   if ms == vec![] {
     Move::Pass
   } else {
+    // 読み切りする
+    // println!("おーい");
+    if number_of_stones(&board) >= 50 {
+      for ((i, j), _) in &ms {
+        println!("{}", number_of_stones(&board));
+        let mut board_tmp = board.clone();
+
+        if yomikiri(&mut board_tmp, color, (*i, *j)) {
+          //println!("よみきったお");
+          return Move::Mv(*i, *j)
+        }
+      }
+      //println!("よみきれなかったお");
+    }
+    //println!("わっほい");
+
     for ((i, j), _) in &ms {
       // 隅が取れる時にはとにかく取る
       if (*i, *j) == (1, 1) || (*i, *j) == (1, 8) || (*i, *j) == (8, 1) || (*i, *j) == (8, 8) {
@@ -255,18 +348,18 @@ pub fn play (board: &Board, color: Color) -> Move {
   }
 }
 
-//fn count (board: &Board, color: Color) -> i32 {
-//  let mut s = 0;
-//
-//  for i in 1..9 {
-//    for j in 1..9 {
-//      if board[i][j] == color {
-//        s += 1;
-//      }
-//    }
-//  }
-//  s
-//}
+fn count (board: &Board, color: Color) -> i32 {
+  let mut s = 0;
+
+  for i in 1..9 {
+    for j in 1..9 {
+      if board[i][j] == color {
+        s += 1;
+      }
+    }
+  }
+  s
+}
 
 pub fn print_board (board: &Board) {
   println!(" |A B C D E F G H ");

@@ -377,7 +377,7 @@ pub fn play (board: &Board, color: Color) -> Move {
         continue;
       }
 
-      if num <= 20 &&
+      if num <= 40 &&
         (*i == 1 || *i == 8 ||
          *j == 1 || *j == 8)
       {
@@ -391,6 +391,11 @@ pub fn play (board: &Board, color: Color) -> Move {
       }
     }
     
+    if num <= 20 && ms.len() >= 2 {
+      let (i, j) = ms[1].0;
+      return Move::Mv(i, j);
+    }
+
     let (i, j) = ms[0].0;
     Move::Mv(i, j)
   }

@@ -147,6 +147,9 @@ pub fn can_create_edge(board: &Board, (i, j): (i32, i32), color: Color) -> bool 
         if !flag {
           if board[i as usize][k as usize] == opposite_color(color) {
             flag = true;
+          } else if board[i as usize][k as usize] == none {
+            ans = false;
+            break;
           }
         } else {
           if board[i as usize][k as usize] == color {
@@ -165,6 +168,9 @@ pub fn can_create_edge(board: &Board, (i, j): (i32, i32), color: Color) -> bool 
         if !flag {
           if board[i as usize][k as usize] == opposite_color(color) {
             flag = true;
+          } else if board[i as usize][k as usize] == none {
+            ans = false;
+            break;
           }
         } else {
           if board[i as usize][k as usize] == color {
@@ -185,6 +191,9 @@ pub fn can_create_edge(board: &Board, (i, j): (i32, i32), color: Color) -> bool 
         if !flag {
           if board[k as usize][j as usize] == opposite_color(color) {
             flag = true;
+          } else if board[k as usize][j as usize] == none {
+            ans = false;
+            break;
           }
         } else {
           if board[k as usize][j as usize] == color {
@@ -203,6 +212,9 @@ pub fn can_create_edge(board: &Board, (i, j): (i32, i32), color: Color) -> bool 
         if !flag {
           if board[k as usize][j as usize] == opposite_color(color) {
             flag = true;
+          } else if board[k as usize][j as usize] == none {
+            ans = false;
+            break;
           }
         } else {
           if board[k as usize][j as usize] == color {
@@ -303,12 +315,20 @@ pub fn play (board: &Board, color: Color) -> Move {
     Move::Pass
   } else {
     let num = number_of_stones(&board);
+    let verbose = true; // ロギングしたい時入れる
+    let logging = |s: &str| {
+      if verbose {
+        println!("LOG: {}", s);
+      }
+    };
     
     // 2手目の定石
     if num == 5 {
       if board[3][4] == black || board[4][3] == black {
+        logging("2手目の定石");
         return Move::Mv(3, 3);
       } else {
+        logging("2手目の定石");
         return Move::Mv(6, 6);
       }
     }
@@ -319,6 +339,7 @@ pub fn play (board: &Board, color: Color) -> Move {
         let mut board_tmp = board.clone();
 
         if yomikiri(&mut board_tmp, color, (*i, *j)) {
+          logging("読み切り");
           return Move::Mv(*i, *j)
         }
       }
@@ -326,10 +347,12 @@ pub fn play (board: &Board, color: Color) -> Move {
 
     for ((i, j), _) in &ms {
       // 隅が取れる時にはとにかく取る
-      if (*i, *j) == (1, 1) || (*i, *j) == (1, 8) || (*i, *j) == (8, 1) || (*i, *j) == (8, 8) {
+      if ((*i, *j) == (1, 1) || (*i, *j) == (1, 8) || (*i, *j) == (8, 1) || (*i, *j) == (8, 8)) && num <= 58 {
+        logging("隅が取れる時にはとにかく取る");
         return Move::Mv(*i, *j);
       // 隅が既に取れていて、かつ隅と連続する縁を取れる場合は取る
       } else if can_create_edge(&board, (*i, *j), color) {
+        logging("隅が既に取れていて、かつ隅と連続する縁を取れる場合は取る");
         return Move::Mv(*i, *j);
       }
     } 
